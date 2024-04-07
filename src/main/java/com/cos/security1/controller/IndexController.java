@@ -1,11 +1,22 @@
 package com.cos.security1.controller;
 
+import com.cos.security1.entity.User;
+import com.cos.security1.entity.UserRole;
+import com.cos.security1.repository.UserRepository;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 @Controller // view를 리턴
 public class IndexController {
+    @Autowired
+    private UserRepository userRepository;
+    @Autowired
+    private BCryptPasswordEncoder bCryptPasswordEncoder;
+
     // localhost:8080/
     // localhost:8080
     @GetMapping({"", "/"})
@@ -34,17 +45,27 @@ public class IndexController {
     // 스프링 시큐리티가 해당 주소를 낚아챔(수정 예정)
     // SecurityConfig 파일 생성 후 작동 안함(낚아채지않고 login으로만 응답)
     @GetMapping("/login")
-    public @ResponseBody String login(){
-        return "login";
+    public String login(){
+        return "loginForm";
     }
 
     @GetMapping("/join")
-    public @ResponseBody String join(){
-        return "join";
+    public String join(){
+        return "joinForm";
     }
 
-    @GetMapping("/joinProc")
-    public @ResponseBody String joinProc(){
-        return "회원가입 완료됨!";
+    @PostMapping("/joinProc")
+    public String joinProc(User user){
+        System.out.println("user = " + user);
+        user.setRole(UserRole.ROLE_USER);
+        // 회원가입은 되지만, 비밀번호가 노출된 상태로 저장됨.(비밀번호 : 1234)
+        // 시큐리티로 로그인을 할 수 없음. 패스워드가 암호화가 되어있지 않기 때문.
+        // userRepository.save(user);
+
+        String rawPassword = user.getPassword();
+        String encPassword = bCryptPasswordEncoder.encode(rawPassword);
+        user.setPassword(encPassword);
+        userRepository.save(user);
+        return "redirect:/loginForm";
     }
 }
