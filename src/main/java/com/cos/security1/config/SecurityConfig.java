@@ -25,14 +25,25 @@ public class SecurityConfig{
 
         http
                 .authorizeHttpRequests((auth) -> auth
-                        .requestMatchers("/", "/login", "/join", "/joinProc").permitAll()
-                        .requestMatchers("/user/**").hasAnyRole("USER", "ADMIN")
+                        // user -> 인증만 되면 들어가는 주소
+                        // manager -> user나 admin 권한이 있어야 들어가는 주소
+                        // admin -> admin 권한이 있어야 들어가는 주소
+                        .requestMatchers("/user/**").authenticated()
+                        .requestMatchers("/manager/**").hasAnyRole("USER", "ADMIN")
                         .requestMatchers("/admin/**").hasRole("ADMIN")
-                        .anyRequest().authenticated()
+                        .anyRequest().permitAll()
                 );
 
         http
-                .formLogin((auth) -> auth.loginPage("/login")
+                .formLogin((auth) -> auth.loginPage("/loginForm")
+                        // /login 주소가 호출되면 시큐리티가 낚아채서 대신 로그인을 진행
+                        // -> 즉, 컨트롤러에 /login을 만들 필요가 없음
+                        .loginProcessingUrl("/login")
+                        // 로그인이 끝나면 리다이렉트할 url
+                        .defaultSuccessUrl("/")
+                        // 정리
+                        // /loginFrom -> /login 해서 로그인이 되면 / 로 이동
+                        // /user -> /login 해서 로그인이 되면 /user로 이동
                 );
 
         return http.build();

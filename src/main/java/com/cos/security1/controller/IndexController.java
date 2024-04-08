@@ -42,20 +42,18 @@ public class IndexController {
         return "manager";
     }
 
-    // 스프링 시큐리티가 해당 주소를 낚아챔(수정 예정)
-    // SecurityConfig 파일 생성 후 작동 안함(낚아채지않고 login으로만 응답)
-    @GetMapping("/login")
-    public String login(){
+    @GetMapping("/loginForm")
+    public String loginForm(){
         return "loginForm";
     }
 
-    @GetMapping("/join")
-    public String join(){
+    @GetMapping("/joinForm")
+    public String joinForm(){
         return "joinForm";
     }
 
-    @PostMapping("/joinProc")
-    public String joinProc(User user){
+    @PostMapping("/join")
+    public String join(User user){
         System.out.println("user = " + user);
         user.setRole(UserRole.ROLE_USER);
         // 회원가입은 되지만, 비밀번호가 노출된 상태로 저장됨.(비밀번호 : 1234)
