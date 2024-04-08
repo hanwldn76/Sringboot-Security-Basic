@@ -4,6 +4,8 @@ import com.cos.security1.entity.User;
 import com.cos.security1.entity.UserRole;
 import com.cos.security1.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.annotation.Secured;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -55,7 +57,7 @@ public class IndexController {
     @PostMapping("/join")
     public String join(User user){
         System.out.println("user = " + user);
-        user.setRole(UserRole.ROLE_USER);
+        user.setRole(UserRole.USER);
         // 회원가입은 되지만, 비밀번호가 노출된 상태로 저장됨.(비밀번호 : 1234)
         // 시큐리티로 로그인을 할 수 없음. 패스워드가 암호화가 되어있지 않기 때문.
         // userRepository.save(user);
@@ -65,5 +67,18 @@ public class IndexController {
         user.setPassword(encPassword);
         userRepository.save(user);
         return "redirect:/loginForm";
+    }
+
+    @Secured("ROLE_ADMIN")
+    @GetMapping("/info")
+    public @ResponseBody String info(){
+        return "개인정보";
+    }
+
+    // data() 메서드가 실행되기 직전에 실행됨
+    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_USER')")
+    @GetMapping("/data")
+    public @ResponseBody String data(){
+        return "데이터정보";
     }
 }

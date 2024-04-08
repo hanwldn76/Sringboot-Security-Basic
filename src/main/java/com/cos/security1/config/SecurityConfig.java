@@ -1,7 +1,9 @@
 package com.cos.security1.config;
 
+import com.cos.security1.entity.UserRole;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfiguration;
@@ -10,6 +12,7 @@ import org.springframework.security.web.SecurityFilterChain;
 
 @Configuration
 @EnableWebSecurity // 스프링 시큐리티 필터가 스프링 필터체인에 등록됨
+@EnableMethodSecurity(securedEnabled = true, prePostEnabled = true)
 public class SecurityConfig{
     // 해당 메서드의 리턴되는 오브젝트를 IoC로 등록해준다.
     @Bean
@@ -25,13 +28,13 @@ public class SecurityConfig{
 
         http
                 .authorizeHttpRequests((auth) -> auth
-                        // user -> 인증만 되면 들어가는 주소
-                        // manager -> user나 admin 권한이 있어야 들어가는 주소
+                        // .anyRequest().authenticated() -> 인증만 되면 들어가는 주소
+                        // user -> user 권한이 있어야 들어가는 주소
                         // admin -> admin 권한이 있어야 들어가는 주소
-                        .requestMatchers("/user/**").authenticated()
-                        .requestMatchers("/manager/**").hasAnyRole("USER", "ADMIN")
-                        .requestMatchers("/admin/**").hasRole("ADMIN")
-                        .anyRequest().permitAll()
+                        .requestMatchers("/", "/loginForm", "/joinForm").permitAll()
+                        .requestMatchers("/user/**").hasRole(UserRole.USER.name())
+                        .requestMatchers("/admin/**").hasRole(UserRole.ADMIN.name())
+                        .anyRequest().authenticated()
                 );
 
         http
